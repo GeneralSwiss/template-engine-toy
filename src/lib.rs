@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-pub fn generate_html_template_var(content: ExpressionData, context: HashMap<String, String>) -> String {
+pub fn generate_html_template_var(
+    content: ExpressionData,
+    context: HashMap<String, String>,
+) -> String {
     let mut html = String::new();
     if let Some(h) = content.head {
         html.push_str(&h);
@@ -19,7 +22,7 @@ pub enum ContentType {
     Literal(String),
     TemplateVariable(ExpressionData),
     Tag(TagType),
-    Unrecognized
+    Unrecognized,
 }
 
 #[derive(PartialEq, Debug)]
@@ -30,7 +33,6 @@ pub enum TagType {
 
 #[derive(PartialEq, Debug)]
 pub struct ExpressionData {
-
     pub head: Option<String>,
     pub variable: String,
     pub tail: Option<String>,
@@ -38,8 +40,11 @@ pub struct ExpressionData {
 
 pub fn get_content_type(input_line: &str) -> ContentType {
     let is_tag_expression = check_matching_pair(input_line, "{%", "%}");
-    let is_for_tag = (check_symbol_string(input_line, "for") && check_symbol_string(input_line, "in")) || check_symbol_string(input_line, "endfor");
-    let is_if_tag = check_symbol_string(input_line, "if") || check_symbol_string(input_line, "endif");
+    let is_for_tag = (check_symbol_string(input_line, "for")
+        && check_symbol_string(input_line, "in"))
+        || check_symbol_string(input_line, "endfor");
+    let is_if_tag =
+        check_symbol_string(input_line, "if") || check_symbol_string(input_line, "endif");
     let is_template_variable = check_matching_pair(input_line, "{{", "}}");
     let return_val;
     if is_tag_expression && is_for_tag {
@@ -108,18 +113,26 @@ mod tests {
             variable: "name".to_string(),
             tail: Some(" ,welcome".to_string()),
         };
-        assert_eq!(ContentType::TemplateVariable(content), get_content_type("Hi {{name}} ,welcome"));
+        assert_eq!(
+            ContentType::TemplateVariable(content),
+            get_content_type("Hi {{name}} ,welcome")
+        );
     }
 
     #[test]
     fn check_for_tag_test() {
-        assert_eq!(ContentType::Tag(TagType::ForTag), get_content_type("{% for name in names %} ,welcome"));
-
+        assert_eq!(
+            ContentType::Tag(TagType::ForTag),
+            get_content_type("{% for name in names %} ,welcome")
+        );
     }
 
     #[test]
     fn check_if_tag_test() {
-        assert_eq!(ContentType::Tag(TagType::IfTag), get_content_type("{% if name == 'Bob' %}"));
+        assert_eq!(
+            ContentType::Tag(TagType::IfTag),
+            get_content_type("{% if name == 'Bob' %}")
+        );
     }
 
     #[test]
